@@ -6,7 +6,9 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 const fs = require("fs");
+const { Types } = require("mongoose");
 const Grid = require("gridfs-stream");
+
 
 app.use(express.json());
 app.use(cors());
@@ -49,7 +51,8 @@ app.post("/upload", upload.single("product"), async (req, res) => {
     metadata: {
       // Add any additional metadata you want to save with the file
       // For example, you might save the user ID or product ID here
-    }
+    },
+    _id: new Types.ObjectId() // Use mongoose.Types.ObjectId to generate a new ObjectID
   });
 
   req.pipe(writestream);
