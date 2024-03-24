@@ -20,12 +20,6 @@ mongoose.connect("mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/
 const conn = mongoose.connection;
 let gfs;
 
-// Check if the 'tmp' directory exists, if not, create it
-const tmpDir = path.join(__dirname, 'tmp');
-if (!fs.existsSync(tmpDir)){
-    fs.mkdirSync(tmpDir);
-}
-
 conn.once('open', () => {
   // Initialize GridFS stream
   gfs = Grid(conn.db, mongoose.mongo);
