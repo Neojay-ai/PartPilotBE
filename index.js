@@ -7,7 +7,7 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
-const apiUrl = "https://autopilot97-8dad7d99b556.herokuapp.com/allproducts";
+const apiUrl = "https://autopilot97-8dad7d99b556.herokuapp.com";
 
 app.use(express.json());
 app.use(cors());
