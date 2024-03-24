@@ -7,8 +7,10 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
-app.use(express.json());
 app.use(cors());
+
+app.use(express.json());
+
 
 // Database Connection With MongoDB
 mongoose.connect(
