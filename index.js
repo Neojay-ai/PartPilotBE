@@ -7,20 +7,8 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
-const apiUrl = "https://autopilot97-8dad7d99b556.herokuapp.com";
-
 app.use(express.json());
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://se-97-seller-side.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
-
-
-
-
+app.use(cors());
 
 // Database Connection With MongoDB
 mongoose.connect(
@@ -44,7 +32,7 @@ const upload = multer({ storage: storage });
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
     success: 1,
-    image_url: apiUrl + `/images/${req.file.filename}`,
+    image_url: `./images/${req.file.filename}`,
   });
 });
 app.use("/images", express.static("upload/images"));
