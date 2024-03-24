@@ -7,8 +7,6 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
-const apiUrl = "https://autopilot97-8dad7d99b556.herokuapp.com";
-
 app.use(express.json());
 app.use(cors());
 
@@ -36,7 +34,7 @@ const upload = multer({ storage: storage });
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
     success: 1,
-    image_url: `./images/${req.file.filename}`,
+    image_url: `/images/${req.file.filename}`,
   });
 });
 app.use("/images", express.static("upload/images"));
