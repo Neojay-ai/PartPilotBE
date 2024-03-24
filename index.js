@@ -10,7 +10,11 @@ const cors = require("cors");
 const apiUrl = "https://autopilot97-8dad7d99b556.herokuapp.com";
 
 app.use(express.json());
-app.use(cors());
+
+app.use(cors({
+  origin: 'https://se-97-seller-side.vercel.app'
+}));
+
 
 
 
