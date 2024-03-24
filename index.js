@@ -45,18 +45,16 @@ app.post("/upload", upload.single("product"), async (req, res) => {
   }
 
   const writestream = gfs.createWriteStream({
-    filename: file.filename,
+    filename: file.originalname,
     metadata: {
       // Add any additional metadata you want to save with the file
       // For example, you might save the user ID or product ID here
     }
   });
 
-  const readStream = fs.createReadStream(file.path);
-  readStream.pipe(writestream);
+  req.pipe(writestream);
 
   writestream.on("close", (file) => {
-    fs.unlinkSync(file.path); // Remove temporary file
     res.json({ success: 1, image_id: file._id }); // Return the ID of the uploaded image
   });
 
