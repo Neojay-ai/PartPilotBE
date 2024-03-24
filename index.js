@@ -11,7 +11,11 @@ const Grid = require("gridfs-stream");
 
 
 app.use(express.json());
-app.use(cors());
+// Allow requests only from 'https://se-97-seller-side.vercel.app'
+app.use(cors({
+  origin: 'https://se-97-seller-side.vercel.app'
+}));
+
 
 // Database Connection With MongoDB
 mongoose.connect("mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/partpilotDB", {
