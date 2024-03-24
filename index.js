@@ -7,10 +7,8 @@ const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
 
-app.use(cors());
-
 app.use(express.json());
-
+app.use(cors());
 
 // Database Connection With MongoDB
 mongoose.connect(
@@ -21,7 +19,7 @@ mongoose.connect(
 
 //Image Storage Engine
 const storage = multer.diskStorage({
-  destination: "/upload/images",
+  destination: "./upload/images",
   filename: (req, file, cb) => {
     console.log(file);
     return cb(
@@ -34,7 +32,7 @@ const upload = multer({ storage: storage });
 app.post("/upload", upload.single("product"), (req, res) => {
   res.json({
     success: 1,
-    image_url: `./images/${req.file.filename}`,
+    image_url: `/images/${req.file.filename}`,
   });
 });
 app.use("/images", express.static("upload/images"));
