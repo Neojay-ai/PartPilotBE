@@ -1,72 +1,41 @@
-const express = require("express");
 const port = process.env.PORT || 4000;
+const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const fs = require("fs");
-const Grid = require("gridfs-stream");
 
 app.use(express.json());
 app.use(cors());
 
 // Database Connection With MongoDB
-mongoose.connect("mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/partpilotDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-const conn = mongoose.connection;
-let gfs;
-
-conn.once('open', () => {
-  // Initialize GridFS stream
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('uploads');
-});
+mongoose.connect(
+  "mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/partpilotDB"
+);
+// paste your mongoDB Connection string above with password
+// password should not contain '@' special character
 
 //Image Storage Engine
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "tmp");
+  destination: "./upload/images",
+  filename: (req, file, cb) => {
+    console.log(file);
+    return cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
   },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-  }
 });
-
 const upload = multer({ storage: storage });
-
 app.post("/upload", upload.single("product"), (req, res) => {
-  const { file } = req;
-  if (!file) {
-    return res.status(400).json({ success: 0, message: "No file uploaded" });
-  }
-
-  const writestream = gfs.createWriteStream({
-    filename: file.filename
-  });
-
-  const readStream = fs.createReadStream(path.join(__dirname, 'tmp', file.filename));
-  readStream.pipe(writestream);
-
-  writestream.on("close", () => {
-    fs.unlinkSync(path.join(__dirname, 'tmp', file.filename));
-    res.json({ success: 1, image_url: `/images/${file.filename}` });
+  res.json({
+    success: 1,
+    image_url: `http://localhost:4000/images/${req.file.filename}`,
   });
 });
-
-app.use("/images", (req, res) => {
-  gfs.files.find().toArray((err, files) => {
-    if (!files || files.length === 0) {
-      return res.status(404).json({ success: 0, message: "No files available" });
-    }
-
-    res.json({ success: 1, files });
-  });
-});
+app.use("/images", express.static("upload/images"));
 
 // MiddleWare to fetch user from database
 const fetchuser = async (req, res, next) => {
@@ -82,7 +51,6 @@ const fetchuser = async (req, res, next) => {
     res.status(401).send({ errors: "Please authenticate using a valid token" });
   }
 };
-
 
 // Schema for creating user model
 const Users = mongoose.model("Users", {
