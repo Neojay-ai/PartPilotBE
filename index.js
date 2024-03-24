@@ -66,6 +66,7 @@ app.post("/upload", upload.single("product"), async (req, res) => {
   });
 });
 
+
 app.get("/images/:imageId", (req, res) => {
   const imageId = req.params.imageId;
   gfs.files.findOne({ _id: mongoose.Types.ObjectId(imageId) }, (err, file) => {
