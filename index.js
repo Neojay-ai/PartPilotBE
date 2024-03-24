@@ -1,3 +1,4 @@
+const port = process.env.PORT || 4000;
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -5,94 +6,36 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const fs = require("fs");
-const { Types } = require("mongoose");
-const Grid = require("gridfs-stream");
-
 
 app.use(express.json());
-// Allow requests only from 'https://se-97-seller-side.vercel.app'
-app.use(cors({
-  origin: 'https://se-97-seller-side.vercel.app'
-}));
-
+app.use(cors());
 
 // Database Connection With MongoDB
-mongoose.connect("mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/partpilotDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-
-const conn = mongoose.connection;
-let gfs;
-
-conn.once('open', () => {
-  // Initialize GridFS stream
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection('uploads');
-});
+mongoose.connect(
+  "mongodb+srv://user2000:MongoTest@cluster0.8xglorf.mongodb.net/partpilotDB"
+);
+// paste your mongoDB Connection string above with password
+// password should not contain '@' special character
 
 //Image Storage Engine
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "tmp");
+  destination: "./upload/images",
+  filename: (req, file, cb) => {
+    console.log(file);
+    return cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
   },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-  }
 });
-
 const upload = multer({ storage: storage });
-
-app.post("/upload", upload.single("product"), async (req, res) => {
-  const { file } = req;
-  if (!file) {
-    return res.status(400).json({ success: 0, message: "No file uploaded" });
-  }
-
-  const writestream = gfs.createWriteStream({
-    filename: file.originalname,
-    metadata: {
-      // Add any additional metadata you want to save with the file
-      // For example, you might save the user ID or product ID here
-    },
-    _id: new Types.ObjectId() // Use mongoose.Types.ObjectId to generate a new ObjectID
-  });
-
-  req.pipe(writestream);
-
-  writestream.on("close", (file) => {
-    res.json({ success: 1, image_id: file._id }); // Return the ID of the uploaded image
-  });
-
-  writestream.on("error", (err) => {
-    console.error("GridFS Write Stream Error:", err);
-    res.status(500).json({ success: 0, message: "Failed to upload file" });
+app.post("/upload", upload.single("product"), (req, res) => {
+  res.json({
+    success: 1,
+    image_url: `/images/${req.file.filename}`,
   });
 });
-
-app.get("/images/:imageId", (req, res) => {
-  const imageId = req.params.imageId;
-  gfs.files.findOne({ _id: mongoose.Types.ObjectId(imageId) }, (err, file) => {
-    if (!file || file.length === 0) {
-      return res.status(404).json({ success: 0, message: "Image not found" });
-    }
-
-    const readstream = gfs.createReadStream(file.filename);
-    readstream.pipe(res);
-  });
-});
-
-
-app.use("/images", (req, res) => {
-  gfs.files.find().toArray((err, files) => {
-    if (!files || files.length === 0) {
-      return res.status(404).json({ success: 0, message: "No files available" });
-    }
-
-    res.json({ success: 1, files });
-  });
-});
+app.use("/images", express.static("upload/images"));
 
 // MiddleWare to fetch user from database
 const fetchuser = async (req, res, next) => {
@@ -315,9 +258,7 @@ app.post("/removeproduct", async (req, res) => {
 
 //------------------------------------------------------------------------
 
-const port = process.env.PORT || 4000;
 app.listen(port, (error) => {
   if (!error) console.log("Server Running on port " + port);
   else console.log("Error : ", error);
 });
-
