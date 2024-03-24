@@ -66,6 +66,17 @@ app.post("/upload", upload.single("product"), async (req, res) => {
   });
 });
 
+app.get("/images/:imageId", (req, res) => {
+  const imageId = req.params.imageId;
+  gfs.files.findOne({ _id: mongoose.Types.ObjectId(imageId) }, (err, file) => {
+    if (!file || file.length === 0) {
+      return res.status(404).json({ success: 0, message: "Image not found" });
+    }
+
+    const readstream = gfs.createReadStream(file.filename);
+    readstream.pipe(res);
+  });
+});
 
 
 app.use("/images", (req, res) => {
