@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/upload", upload.single("product"), (req, res) => {
+app.post("/upload", upload.single("product"), async (req, res) => {
   const { file } = req;
   if (!file) {
     return res.status(400).json({ success: 0, message: "No file uploaded" });
@@ -48,14 +48,20 @@ app.post("/upload", upload.single("product"), (req, res) => {
     filename: file.filename
   });
 
-  const readStream = fs.createReadStream(path.join(__dirname, 'tmp', file.filename));
+  const readStream = fs.createReadStream(file.path);
   readStream.pipe(writestream);
 
   writestream.on("close", () => {
-    fs.unlinkSync(path.join(__dirname, 'tmp', file.filename));
+    fs.unlinkSync(file.path); // Remove temporary file
     res.json({ success: 1, image_url: `/images/${file.filename}` });
   });
+
+  writestream.on("error", (err) => {
+    console.error("GridFS Write Stream Error:", err);
+    res.status(500).json({ success: 0, message: "Failed to upload file" });
+  });
 });
+
 
 app.use("/images", (req, res) => {
   gfs.files.find().toArray((err, files) => {
