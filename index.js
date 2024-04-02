@@ -81,24 +81,19 @@ const Product = mongoose.model("Product", {
   },
   name: {
     type: String,
-    required: true,
   },
 
   image: {
     type: String,
-    required: true,
   },
   category: {
     type: String,
-    required: true,
   },
   brand: {
     type: String,
-    required: true,
   },
   model: {
     type: String,
-    required: true,
   },
   description: {
     type: String,
@@ -108,15 +103,13 @@ const Product = mongoose.model("Product", {
   },
   year: {
     type: Number,
-    require: true,
-    required: true,
+
   },
   old_price: {
     type: Number,
   },
   contact: {
     type: String,
-    require: true,
   },
   date: {
     type: Date,
